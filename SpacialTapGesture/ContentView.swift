@@ -39,6 +39,25 @@ struct ContentView: View {
                 }
             }
         }
+        .gesture(spatialTapGesture)
+    }
+    
+    var spatialTapGesture: some Gesture {
+        SpatialTapGesture()
+            .targetedToAnyEntity()
+            .onEnded { value in
+                if let subject = subject,
+                   let indicator = indicator {
+                    // convert the location3D to the coordinate space of the subject
+                    // Place indicator on surface of the subject
+                    let tappedPosition = value.convert(
+                        value.location3D,
+                        from: .local,
+                        to: subject
+                    )
+                    indicator.position = tappedPosition
+                }
+            }
     }
 }
 
