@@ -14,37 +14,28 @@ import RealityKit
 import RealityKitContent
 
 struct ContentView: View {
-
-    @State private var enlarge = false
+    
+    @State var subject: Entity?
+    @State var indicator: Entity?
 
     var body: some View {
         RealityView { content in
             // Add the initial RealityKit content
             if let scene = try? await Entity(named: "Scene", in: realityKitContentBundle) {
                 content.add(scene)
-            }
-        } update: { content in
-            // Update the RealityKit content when SwiftUI state changes
-            if let scene = content.entities.first {
-                let uniformScale: Float = enlarge ? 1.4 : 1.0
-                scene.transform.scale = [uniformScale, uniformScale, uniformScale]
-            }
-        }
-        .gesture(TapGesture().targetedToAnyEntity().onEnded { _ in
-            enlarge.toggle()
-        })
-        .toolbar {
-            ToolbarItemGroup(placement: .bottomOrnament) {
-                VStack (spacing: 12) {
-                    Button {
-                        enlarge.toggle()
-                    } label: {
-                        Text(enlarge ? "Reduce RealityView Content" : "Enlarge RealityView Content")
-                    }
-                    .animation(.none, value: 0)
-                    .fontWeight(.semibold)
-
-                    ToggleImmersiveSpaceButton()
+                
+                // place this indicator at tap location
+                let indicatorModel = ModelEntity(
+                    mesh: .generateSphere(radius: 0.025),
+                    materials: [SimpleMaterial(color: .black, isMetallic: false)]
+                )
+                
+                // Get cube from the scene. It has Input & Collision components
+                if let cube = scene.findEntity(named: "Cube") {
+                    cube.components.set(HoverEffectComponent())
+                    cube.addChild(indicatorModel)
+                    subject = cube
+                    indicator = indicatorModel
                 }
             }
         }
